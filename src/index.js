@@ -1,19 +1,28 @@
+
 import _ from 'lodash'
-import dingle from './dingle.js'
+import bootCJS from './bootCJS.js'
+import * as cjs from 'createjs-module';
 import './style.css'
 
-function component() {
-  const element = document.createElement('div');
+const { 
+  canvas, 
+  stage, 
+  container 
+} = bootCJS('cjs-canvas')
 
-  // Lodash, now imported by this script
-  element.innerHTML = _.join(_.times(4, ()=> {
-    return "fart"
-  }), " ");
-  element.classList.add('hello');
+kickoffCJS()
 
-  return element;
+function kickoffCJS() {
+  cjs.Ticker.framerate = 30
+  cjs.Ticker.addEventListener('tick', tick)
 }
 
-dingle()
+function tick(e) {
+  stage.update()
+}
 
-document.body.appendChild(component());
+////////
+
+let shape = new cjs.Shape();
+shape.graphics.beginFill('#ff0000').drawRect(-50, -50, 100, 100);
+container.addChild(shape)
