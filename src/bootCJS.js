@@ -8,7 +8,7 @@ export default function bootCJS(canvasID) {
   let stage = new cjs.Stage(canvas)
   let scaler = 1
   let scaleBoundMin = 700
-  let scaleBoundMax = 1000
+  // let scaleBoundMax = 700
 
   let context = stage.canvas.getContext("2d");
   context.imageSmoothingEnabled = false;
@@ -24,11 +24,13 @@ export default function bootCJS(canvasID) {
     if (canvas.width < scaleBoundMin || canvas.height < scaleBoundMin) { 
       let smallestScaleSize = canvas.width < canvas.height ? canvas.width : canvas.height
       scaler = smallestScaleSize / scaleBoundMin
-    } else if (canvas.width > scaleBoundMax && canvas.height > scaleBoundMax) {
-      let smallestScaleSize = canvas.width < canvas.height ? canvas.width : canvas.height
-      scaler = smallestScaleSize / scaleBoundMax
-    // console.log("scaler:", scaler)
-    }
+    } 
+
+    // else if (canvas.width > scaleBoundMax && canvas.height > scaleBoundMax) {
+    //   let smallestScaleSize = canvas.width < canvas.height ? canvas.width : canvas.height
+    //   scaler = smallestScaleSize / scaleBoundMax
+    // // console.log("scaler:", scaler)
+    // }
     container.scaleX = scaler
     container.scaleY = scaler
     container.x = canvas.width / 2

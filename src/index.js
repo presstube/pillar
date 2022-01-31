@@ -1,14 +1,20 @@
 
 import _ from 'lodash'
 import bootCJS from './bootCJS.js'
-import * as cjs from 'createjs-module';
+import * as cjs from 'createjs-module'
+import pSBC from 'shade-blend-color'
 import './style.css'
+
+var comp=AdobeAn.getComposition("A3238E787B9042E0BA7D76738032C1C1")
+var lib=comp.getLibrary()
 
 const { 
   canvas, 
   stage, 
   container 
 } = bootCJS('cjs-canvas')
+
+console.log("lib: ", lib)
 
 kickoffCJS()
 
@@ -18,7 +24,7 @@ let pillarAssetContainer = new cjs.Container()
 container.addChild(pillarAssetContainer)
 let pillarAssets = makePillarAssets(pillarShape)
 
-let rotationRange = _.random(40, 80)
+let rotationRange = _.random(20, 40)
 let pillarAssetsSortedByX = _.sortBy(pillarAssets, ['x'])
 _.map(pillarAssetsSortedByX, (asset, index) => {
   let percentage = index / pillarAssetsSortedByX.length
@@ -28,17 +34,51 @@ _.map(pillarAssetsSortedByX, (asset, index) => {
 let pillarAssetsSortedByY = _.sortBy(pillarAssets, ['y'])
 _.map(pillarAssetsSortedByY, (asset, index) => {
   let percentage = index / pillarAssetsSortedByX.length
-  asset.scaleX = asset.scaleY = percentage + 2
+  // asset.scaleX = asset.scaleY = (percentage*0.5) + 1
+  if (_.random(1) < 0.5) {
+    asset.scaleX = -1
+  }
   pillarAssetContainer.addChild(asset)
+})
+
+let patchAssetID = _.random(1,11)
+let patchAssetContainer = new cjs.Container()
+container.addChild(patchAssetContainer)
+let patchAssets = _.map(pillarAssetsSortedByY, pillarAsset => {
+  if (Math.random() < 0.2) {
+    patchAssetID = _.random(2,11)
+  }
+  let patchAsset = new lib["Patch_" + patchAssetID]
+  recolor(patchAsset, '#ffffff', 1)
+  patchAsset.x = pillarAsset.x
+  patchAsset.y = pillarAsset.y
+  patchAsset.scaleX = pillarAsset.scaleX
+  patchAsset.scaleY = pillarAsset.scaleY
+  patchAsset.rotation = pillarAsset.rotation
+  patchAssetContainer.addChild(patchAsset)
+  return patchAsset
 })
 
 ////////////////
 
+function recolor(asset, color, width) {
+  let tempColor = color
+  let colorShiftRange = 16  
+  let colorShiftAmount = Math.random()/colorShiftRange - Math.random()/colorShiftRange
+  tempColor = pSBC(colorShiftAmount, tempColor)
+  let strokeColor = pSBC(-0.2, tempColor)
+  asset.children[0].graphics._fill.style = tempColor
+  // asset.children[1].graphics._stroke.style = strokeColor
+  asset.children[1].graphics._stroke.style = 'rgba(0, 0, 0, 0.02)'
+  asset.children[1].graphics._strokeStyle.width = width
+}
+
 function makePillarShape() {
   let circleContainer = new cjs.Container()
-  let numCircles = _.random(50, 100)
-  let yDistInterval = _.random(5, 10)
-  let xRange = _.random(50, 200)
+  let numCircles = _.random(30, 50)
+  let yDistInterval = 8
+  // let yDistInterval = _.random(5, 10)
+  let xRange = _.random(50, 150)
   let circles = _.times(numCircles, makeCircle)
   _.map(circles, (circle, index) => {
     let percentage = 1 - (index / numCircles)
@@ -50,7 +90,7 @@ function makePillarShape() {
 }
 
 function makePillarAssets(pillarShape) {
-  let assets = _.times(100, makeMarker)
+  let assets = _.times(40, makeMarker)
   _.map(assets, asset => {
     pillarAssetContainer.addChild(asset)
     let pt
@@ -78,7 +118,7 @@ function placeItem(item, range) {
 
 function makeCircle() {
   let item = new cjs.Shape()
-  item.graphics.beginFill('#222222').drawCircle(0, 0, 100);
+  item.graphics.beginFill('#fff').drawCircle(0, 0, 100);
   return item
 }
 
