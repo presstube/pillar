@@ -12,32 +12,43 @@ const {
 
 kickoffCJS()
 
-let range = 200
-
-// forming the general shape
-let circleContainer = new cjs.Container()
-container.addChild(circleContainer)
-let circles = _.times(3, makeCircle)
-_.map(circles, circle => {
-  placeItem(circle, 200)
-  circleContainer.addChild(circle)
-})
-
-// only spawning assets based on general shape
-let dotContainer = new cjs.Container()
-container.addChild(dotContainer)
-let dots = _.times(100, makeDot)
-_.map(dots, dot => {
-  dotContainer.addChild(dot)
-  let pt
-  do {
-    placeItem(dot, 500)
-    pt = dot.localToLocal(0, 0, circleContainer)
-  } while (!circleContainer.hitTest(pt.x, pt.y))
-})
+let pillarShape = makePillarShape()
+container.addChild(pillarShape)
+// pillarShape.y = stage.height / 2
+// let pillarAssets = makePillarAssets(pillarShape)
 
 ////////////////
-////////////////
+
+function makePillarShape() {
+  let circleContainer = new cjs.Container()
+  let numCircles = 20
+  let yDistInterval = 20
+  let xRange = _.random(50, 200)
+  let circles = _.times(numCircles, makeCircle)
+  _.map(circles, (circle, index) => {
+    let percentage = 1 - (index / numCircles)
+    circle.y = -(index * yDistInterval)
+    circle.x = _.random(-xRange * percentage, xRange * percentage)
+    // placeItem(circle, 200)
+    circleContainer.addChild(circle)
+  })
+  return circleContainer
+}
+
+function makePillarAssets(pillarShape) {
+  let dotContainer = new cjs.Container()
+  container.addChild(dotContainer)
+  let dots = _.times(100, makeDot)
+  _.map(dots, dot => {
+    dotContainer.addChild(dot)
+    let pt
+    do {
+      placeItem(dot, 500)
+      pt = dot.localToLocal(0, 0, pillarShape)
+    } while (!pillarShape.hitTest(pt.x, pt.y))
+  })
+  return dots
+}
 
 function kickoffCJS() {
   cjs.Ticker.framerate = 30
@@ -55,7 +66,7 @@ function placeItem(item, range) {
 
 function makeCircle() {
   let item = new cjs.Shape()
-  item.graphics.beginFill('#110000').drawCircle(0, 0, 100);
+  item.graphics.beginFill('#330000').drawCircle(0, 0, 100);
   return item
 }
 

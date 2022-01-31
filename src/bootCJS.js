@@ -32,7 +32,7 @@ export default function bootCJS(canvasID) {
     container.scaleX = scaler
     container.scaleY = scaler
     container.x = canvas.width / 2
-    container.y = canvas.height / 2
+    container.y = canvas.height
 
     retinalize()
   }
