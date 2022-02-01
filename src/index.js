@@ -25,9 +25,9 @@ let pillarShape,
     patchAssets,
     head;
 
-let colorFill = '#111'
-let colorStroke = '#333'
-let widthStroke = 1
+let colorFill = '#fff'
+let colorStroke = '#000 '
+let widthStroke = 2
 
 kickoffCJS()
 makeIt()
@@ -91,7 +91,9 @@ function makeIt() {
     if (Math.random() < 0.2) {
       patchAssetID = _.random(2,11)
     }
-    let patchAsset = new lib["Patch_" + patchAssetID]
+    // let patchAsset = new lib["Patch_" + patchAssetID]
+    let patchAsset = new lib["Patch_" + 5]
+    patchAsset.gotoAndPlay(_.random(patchAsset.totalFrames))
     recolor(patchAsset, colorFill, colorStroke, widthStroke)
     patchAsset.x = pillarAsset.x
     patchAsset.y = pillarAsset.y
@@ -100,8 +102,8 @@ function makeIt() {
     patchAsset.rotation = pillarAsset.rotation
     patchAssetContainer.addChild(patchAsset)
     let initRotation = patchAsset.rotation
-    let newRotation = patchAsset.rotation + _.random(3, 8)
-    let tweenTime = 5000
+    let newRotation = patchAsset.rotation + _.random(5, 20)
+    let tweenTime = 3000
     cjs.Tween.get(patchAsset, {override:false, loop: -1})
       .wait(index * 40)
       .to({rotation: newRotation}, tweenTime, cjs.Ease.quadInOut)
@@ -122,7 +124,7 @@ function makeIt() {
   patchAssetContainer.addChildAt(pillarShape, 0)
   let rotAmount = 1
   patchAssetContainer.rotation = rotAmount
-  let tweenTime = 5000
+  let tweenTime = 6000
   cjs.Tween.get(patchAssetContainer, {override:false, loop: -1})
     .wait(_.random(tweenTime))
     .to({rotation: -rotAmount}, tweenTime, cjs.Ease.quadInOut)
@@ -207,7 +209,7 @@ function makeBGShape() {
 
 function makeCircle() {
   let item = new cjs.Shape()
-  item.graphics.beginFill('#111').drawCircle(0, 0, 100);
+  item.graphics.beginFill(colorFill ).drawCircle(0, 0, 100);
   return item
 }
 
