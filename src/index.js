@@ -22,38 +22,47 @@ let pillarShape,
     pillarAssetsSortedByY,
     patchAssetID,
     patchAssetContainer,
-    patchAssets;
+    patchAssets,
+    head;
 
-console.log("lib: ", lib)
+let colorFill = '#111'
+let colorStroke = '#333'
+let widthStroke = 1
 
 kickoffCJS()
-
 makeIt()
-
-setInterval(()=>{
-  destroyIt()
-  makeIt()
-}, 3000)
-
-window.addEventListener('keypress', e => {
-  console.log('keypress:', e)
-  if (e.code == 'Space') {
-    destroyIt()
-    makeIt()
-  }
-})
+setupKeyboard()
 
 ////////////////
+
+function setupKeyboard() {
+  window.addEventListener('keypress', e => {
+    console.log('keypress:', e)
+    if (e.code == 'Space') {
+      destroyIt()
+      makeIt()
+    }
+  })
+}
+
+function startInterval() {
+  setInterval(()=>{
+    destroyIt()
+    makeIt()
+  }, 3000)
+}
 
 function destroyIt() {
   container.removeChild(pillarShape)
   container.removeChild(pillarAssetContainer)
   container.removeChild(patchAssetContainer)
+  container.removeChild(head)
 }
 
 function makeIt() {
   pillarShape = makePillarShape()
   container.addChild(pillarShape)
+
   pillarAssetContainer = new cjs.Container()
   container.addChild(pillarAssetContainer)
   pillarAssets = makePillarAssets(pillarShape)
@@ -78,38 +87,67 @@ function makeIt() {
   patchAssetID = _.random(2,11)
   patchAssetContainer = new cjs.Container()
   container.addChild(patchAssetContainer)
-  patchAssets = _.map(pillarAssetsSortedByY, pillarAsset => {
+  patchAssets = _.map(pillarAssetsSortedByY, (pillarAsset, index) => {
     if (Math.random() < 0.2) {
       patchAssetID = _.random(2,11)
     }
     let patchAsset = new lib["Patch_" + patchAssetID]
-    recolor(patchAsset, '#222', 0)
+    recolor(patchAsset, colorFill, colorStroke, widthStroke)
     patchAsset.x = pillarAsset.x
     patchAsset.y = pillarAsset.y
     patchAsset.scaleX = pillarAsset.scaleX
     patchAsset.scaleY = pillarAsset.scaleY
     patchAsset.rotation = pillarAsset.rotation
     patchAssetContainer.addChild(patchAsset)
+    let initRotation = patchAsset.rotation
+    let newRotation = patchAsset.rotation + _.random(3, 8)
+    let tweenTime = 5000
+    cjs.Tween.get(patchAsset, {override:false, loop: -1})
+      .wait(index * 40)
+      .to({rotation: newRotation}, tweenTime, cjs.Ease.quadInOut)
+      .to({rotation: initRotation}, tweenTime, cjs.Ease.quadInOut)
+
     return patchAsset
   })  
+  container.removeChild(pillarShape)
+  container.removeChild(pillarAssetContainer)
+
+  let topCircle = _.sortBy(pillarShape.children, ['y'], ['desc'])[0]
+  head = makeHead2()
+  recolor(head , colorFill, colorStroke, widthStroke)
+  head.y = topCircle.y - 100
+  // patchAssetContainer.addChildAt(head, pillarAssetsSortedByY[pillarAssetsSortedByY.length])
+  patchAssetContainer.addChildAt(head, 2)
+  // console.log("topCircle: ", topCircle[0])
+  patchAssetContainer.addChildAt(pillarShape, 0)
+  let rotAmount = 1
+  patchAssetContainer.rotation = rotAmount
+  let tweenTime = 5000
+  cjs.Tween.get(patchAssetContainer, {override:false, loop: -1})
+    .wait(_.random(tweenTime))
+    .to({rotation: -rotAmount}, tweenTime, cjs.Ease.quadInOut)
+    .to({rotation: rotAmount}, tweenTime, cjs.Ease.quadInOut)
+
+
 }
 
-function recolor(asset, color, width) {
-  let tempColor = color
-  let colorShiftRange = 10  
+function recolor(asset, fillColor, strokeColor, strokeWidth) {
+  let tempColor = fillColor
+  let colorShiftRange = 16  
   let colorShiftAmount = Math.random()/colorShiftRange - Math.random()/colorShiftRange
   tempColor = pSBC(colorShiftAmount, tempColor)
-  let strokeColor = pSBC(0.2, tempColor)
-  asset.children[0].graphics._fill.style = tempColor
-  // asset.children[1].graphics._stroke.style = strokeColor
-  asset.children[1].graphics._stroke.style = 'rgba(255, 255, 255, 0)'
-  asset.children[1].graphics._strokeStyle.width = width
+  // let strokeColor = pSBC(-0.1, tempColor)
+  asset.children[0].graphics._fill.style = fillColor
+  // asset.children[0].graphics._fill.style = tempColor
+  // asset.children[1].graphics._stroke.style = 'rgba(0,0,0,1)'
+  asset.children[1].graphics._stroke.style = strokeColor
+  asset.children[1].graphics._strokeStyle.width = strokeWidth
 }
 
 function makePillarShape() {
-  let circleContainer = new cjs.Container()
-  let numCircles = _.random(30, 50)
-  let yDistInterval = 8
+  let pillarShapeContainer = new cjs.Container()
+  let numCircles = _.random(10, 20)
+  let yDistInterval = 20
   // let yDistInterval = _.random(5, 10)
   let xRange = _.random(50, 150)
   let circles = _.times(numCircles, makeCircle)
@@ -117,9 +155,9 @@ function makePillarShape() {
     let percentage = 1 - (index / numCircles)
     circle.y = -(index * yDistInterval)
     circle.x = _.random(-xRange * percentage, xRange * percentage)
-    circleContainer.addChild(circle)
+    pillarShapeContainer.addChild(circle)
   })
-  return circleContainer
+  return pillarShapeContainer
 }
 
 function makePillarAssets(pillarShape) {
@@ -149,9 +187,27 @@ function placeItem(item, range) {
   item.y = _.random(-range, range)
 }
 
+function makeHead2() {
+  let item = new lib.Pilllar_BG_1()
+  return item
+}
+
+function makeHead() {
+  let item = new cjs.Shape()
+  item.graphics.beginFill('pink')
+    .drawCircle(0, 0, 100)
+  return item
+}
+
+function makeBGShape() {
+  let item = new lib.Pilllar_BG_1()
+  // item.rotation = _.random(360)
+  return item
+}
+
 function makeCircle() {
   let item = new cjs.Shape()
-  item.graphics.beginFill('#222').drawCircle(0, 0, 100);
+  item.graphics.beginFill('#111').drawCircle(0, 0, 100);
   return item
 }
 
