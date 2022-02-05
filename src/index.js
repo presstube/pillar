@@ -23,7 +23,10 @@ let pillarShape,
     patchAssetID,
     patchAssetContainer,
     patchAssets,
-    head;
+    head,
+    vaseFront,
+    vaseBack,
+    vaseAssets = [];
 
 let colorFill = '#fff'
 let colorStroke = '#000 '
@@ -57,6 +60,10 @@ function destroyIt() {
   container.removeChild(pillarAssetContainer)
   container.removeChild(patchAssetContainer)
   container.removeChild(head)
+  _.map(vaseAssets, asset => {
+    container.removeChild(asset)
+  })
+  vaseAssets = []
 }
 
 function makeIt() {
@@ -92,45 +99,99 @@ function makeIt() {
       patchAssetID = _.random(2,11)
     }
     // let patchAsset = new lib["Patch_" + patchAssetID]
-    let patchAsset = new lib["Patch_" + 5]
-    patchAsset.gotoAndPlay(_.random(patchAsset.totalFrames))
-    recolor(patchAsset, colorFill, colorStroke, widthStroke)
+    // let patchAsset = new lib["Patch_" + 5]
+    let patchAsset = new lib["UniPatch_" + 1]
+    // patchAsset.gotoAndStop(_.random(patchAsset.totalFrames))
+    patchAsset.gotoAndPlay(index % patchAsset.totalFrames)
+    // recolor(patchAsset, colorFill, colorStroke, widthStroke)
     patchAsset.x = pillarAsset.x
     patchAsset.y = pillarAsset.y
     patchAsset.scaleX = pillarAsset.scaleX
     patchAsset.scaleY = pillarAsset.scaleY
     patchAsset.rotation = pillarAsset.rotation
     patchAssetContainer.addChild(patchAsset)
-    let initRotation = patchAsset.rotation
-    let newRotation = patchAsset.rotation + _.random(5, 20)
-    let tweenTime = 3000
-    cjs.Tween.get(patchAsset, {override:false, loop: -1})
-      .wait(index * 40)
-      .to({rotation: newRotation}, tweenTime, cjs.Ease.quadInOut)
-      .to({rotation: initRotation}, tweenTime, cjs.Ease.quadInOut)
+
+  
 
     return patchAsset
   })  
   container.removeChild(pillarShape)
   container.removeChild(pillarAssetContainer)
 
-  let topCircle = _.sortBy(pillarShape.children, ['y'], ['desc'])[0]
-  head = makeHead2()
-  recolor(head , colorFill, colorStroke, widthStroke)
-  head.y = topCircle.y - 100
-  // patchAssetContainer.addChildAt(head, pillarAssetsSortedByY[pillarAssetsSortedByY.length])
-  patchAssetContainer.addChildAt(head, 2)
-  // console.log("topCircle: ", topCircle[0])
-  patchAssetContainer.addChildAt(pillarShape, 0)
-  let rotAmount = 1
-  patchAssetContainer.rotation = rotAmount
-  let tweenTime = 6000
-  cjs.Tween.get(patchAssetContainer, {override:false, loop: -1})
-    .wait(_.random(tweenTime))
-    .to({rotation: -rotAmount}, tweenTime, cjs.Ease.quadInOut)
-    .to({rotation: rotAmount}, tweenTime, cjs.Ease.quadInOut)
+  // let topCircle = _.sortBy(pillarShape.children, ['y'], ['desc'])[0]
+  // head = makeHead2()
+  // recolor(head , colorFill, colorStroke, widthStroke)
+  // head.y = topCircle.y - 100
+  // // patchAssetContainer.addChildAt(head, pillarAssetsSortedByY[pillarAssetsSortedByY.length])
+  // patchAssetContainer.addChildAt(head, 2)
+  // // console.log("topCircle: ", topCircle[0])
+  // patchAssetContainer.addChildAt(pillarShape, 0)
 
+  // let rotAmount = 1
+  // patchAssetContainer.rotation = rotAmount
+  // let tweenTime = 6000
+  // cjs.Tween.get(patchAssetContainer, {override:false, loop: -1})
+  //   .wait(_.random(tweenTime))
+  //   .to({rotation: -rotAmount}, tweenTime, cjs.Ease.quadInOut)
+  //   .to({rotation: rotAmount}, tweenTime, cjs.Ease.quadInOut)
 
+  makeBGAssets(patchAssetContainer)
+
+  addTweensToBushAssets()
+
+  makeVase(-200, 2, 1)
+  makeVase(-150, 2.5, -1)
+
+}
+
+function makeVase(y, scale, scaleXMult) {
+  vaseFront = new lib.Vase_1_front
+  vaseBack = new lib.Vase_1_back
+  container.addChildAt(vaseBack, 0)
+  container.addChild(vaseFront)
+  vaseBack.y = y
+  vaseFront.y = y
+  vaseBack.scaleX = vaseBack.scaleY = scale
+  vaseFront.scaleX = vaseFront.scaleY = scale
+  vaseBack.scaleX = vaseFront.scaleX = scale * scaleXMult
+  setAnimationStrokeWidth(vaseFront, 2)
+  setAnimationStrokeWidth(vaseBack, 2)
+  vaseAssets.push(vaseFront)
+  vaseAssets.push(vaseBack)
+}
+
+function setAnimationStrokeWidth(anim, targetWeight) {
+  let current = anim.currentFrame
+  _.times(anim.totalFrames, frameIndex => {
+    anim.gotoAndStop(frameIndex) 
+    anim.children[1].graphics._strokeStyle.width = targetWeight / anim.scaleX
+  })
+  anim.gotoAndPlay(current)
+}
+
+function addTweensToBushAssets() {
+  let total = patchAssetContainer.children.length
+  _.map(patchAssetContainer.children, (asset, index) => {
+    let initRotation = asset.rotation
+    let initY = asset.y
+    let newRotation = asset.rotation + _.random(-40, 40)
+    let tweenTime = 933.3333333333
+    cjs.Tween.get(asset, {override:false, loop: -1})
+      .wait(index * 40)
+      .to({rotation: newRotation, y: initY - _.random(20, 60)}, tweenTime, cjs.Ease.quadInOut)
+      .to({rotation: initRotation, y: initY}, tweenTime, cjs.Ease.quadInOut)  
+  })
+}
+
+function makeBGAssets(patchAssetContainer) {
+  let bgAssetsContainer = new cjs.Container()
+  _.map(pillarShape.children, circle => {
+    let bgAsset = new lib.Pilllar_BG_1()
+    bgAsset.x = circle.x
+    bgAsset.y = circle.y
+    patchAssetContainer.addChildAt(bgAsset, pillarShape.getChildIndex(circle))
+  })
+  // patchAssetContainer.addChild(bgAssetsContainer)
 }
 
 function recolor(asset, fillColor, strokeColor, strokeWidth) {
@@ -149,7 +210,8 @@ function recolor(asset, fillColor, strokeColor, strokeWidth) {
 function makePillarShape() {
   let pillarShapeContainer = new cjs.Container()
   let numCircles = _.random(10, 20)
-  let yDistInterval = 20
+  let yDistInterval = _.random(20, 30)
+  // let yDistInterval = _.random(10, 20)
   // let yDistInterval = _.random(5, 10)
   let xRange = _.random(50, 150)
   let circles = _.times(numCircles, makeCircle)
@@ -163,7 +225,7 @@ function makePillarShape() {
 }
 
 function makePillarAssets(pillarShape) {
-  let assets = _.times(40, makeMarker)
+  let assets = _.times(_.random(20, 30), makeMarker)
   _.map(assets, asset => {
     pillarAssetContainer.addChild(asset)
     let pt
