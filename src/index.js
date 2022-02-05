@@ -142,6 +142,8 @@ function makeIt() {
   makeVase(-200, 2, 1)
   makeVase(-150, 2.5, -1)
 
+  patchAssetContainer.y = -100
+
 }
 
 function makeVase(y, scale, scaleXMult) {
