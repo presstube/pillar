@@ -29,7 +29,8 @@ let pillarShape,
     vaseAssets = [],
     riverTrackPositions = [],
     riverTrackContainerBack,
-    riverTrackContainerFront;
+    riverTrackContainerFront,
+    bgContainer;
 
 let colorFill = '#fff'
 let colorStroke = '#000 '
@@ -39,6 +40,8 @@ kickoffCJS()
 makeIt()
 setupKeyboard()
 setupRiverTrack()
+
+
 
 console.log("rtp: ", riverTrackPositions)
 
@@ -76,7 +79,7 @@ function makeRiverChunk() {
   riverChunk.x = startingPos.x + _.random(-riverChunkRange, riverChunkRange)
   riverChunk.y = startingPos.y + _.random(-riverChunkRange, riverChunkRange)
   riverChunk.rotation = startingPos.rotation
-  if (startingPos.rotation < 0) {
+  if (startingPos.rotation >  0) {
     container.addChild(riverChunk)
   } else {
     container.addChildAt(riverChunk, 0)
@@ -108,6 +111,7 @@ function startInterval() {
 }
 
 function destroyIt() {
+  container.removeChild(bgContainer)
   container.removeChild(pillarShape)
   container.removeChild(pillarAssetContainer)
   container.removeChild(patchAssetContainer)
@@ -119,6 +123,8 @@ function destroyIt() {
 }
 
 function makeIt() {
+  bgContainer = makeBGPattern()
+  container.addChild(bgContainer)
   pillarShape = makePillarShape()
   container.addChild(pillarShape)
 
@@ -187,7 +193,7 @@ function makeIt() {
   //   .to({rotation: -rotAmount}, tweenTime, cjs.Ease.quadInOut)
   //   .to({rotation: rotAmount}, tweenTime, cjs.Ease.quadInOut)
 
-  makeBGAssets()
+  makePillarBGAssets()
 
 
   addTweensToBushAssets()
@@ -198,6 +204,27 @@ function makeIt() {
 
   patchAssetContainer.y = -100
 
+}
+
+function makeBGPattern() {
+  let gridSize = 20
+  let spacing = 200
+  let bgPattern = new cjs.Container()
+  _.times(20, outerIndex => {
+    _.times(20, innerIndex => {
+      let bgAsset = new lib.BG_1()
+      bgAsset.rotation = _.random(360)
+      bgAsset.scaleX = _.random(2) == 1 ? 1 : -1
+      bgAsset.x = innerIndex * spacing - (gridSize / 2 * spacing)
+      bgAsset.y = outerIndex * spacing - (gridSize / 2 * spacing)
+      bgAsset.children[0].graphics._stroke.style = '#111111'
+      bgAsset.children[0].graphics._strokeStyle.width = 1
+      // bgAsset.cache(-25, -25, 50, 50)
+      bgPattern.addChild(bgAsset)
+    })
+  })
+  bgPattern.cache(-(gridSize * spacing / 2), -(gridSize * spacing / 2), (gridSize * spacing), (gridSize * spacing))
+  return bgPattern
 }
 
 function makeHead() {
@@ -253,7 +280,7 @@ function addTweensToBushAssets() {
   })
 }
 
-function makeBGAssets() {
+function makePillarBGAssets() {
   let bgAssetsContainer = new cjs.Container()
   _.map(pillarShape.children, circle => {
     let bgAsset = new lib.Pilllar_BG_1()
@@ -279,11 +306,14 @@ function recolor(asset, fillColor, strokeColor, strokeWidth) {
 
 function makePillarShape() {
   let pillarShapeContainer = new cjs.Container()
-  let numCircles = _.random(10, 20)
-  let yDistInterval = _.random(20, 25)
+  let numCircles = 15
+  // let numCircles = _.random(10, 20)
+  let yDistInterval = 25
+  // let yDistInterval = _.random(2/0, 25)
   // let yDistInterval = _.random(10, 20)
   // let yDistInterval = _.random(5, 10)
-  let xRange = _.random(50, 150)
+  let xRange = 80
+  // let xRange = _.random(50, 150)
   let circles = _.times(numCircles, makeCircle)
   _.map(circles, (circle, index) => {
     let percentage = 1 - (index / numCircles)
@@ -295,7 +325,7 @@ function makePillarShape() {
 }
 
 function makePillarAssets(pillarShape) {
-  let assets = _.times(_.random(20, 30), makeMarker)
+  let assets = _.times(_.random(15, 20), makeMarker)
   _.map(assets, asset => {
     pillarAssetContainer.addChild(asset)
     let pt
