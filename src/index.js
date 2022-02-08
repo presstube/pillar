@@ -26,7 +26,10 @@ let pillarShape,
     head,
     vaseFront,
     vaseBack,
-    vaseAssets = [];
+    vaseAssets = [],
+    riverTrackPositions = [],
+    riverTrackContainerBack,
+    riverTrackContainerFront;
 
 let colorFill = '#fff'
 let colorStroke = '#000 '
@@ -35,8 +38,57 @@ let widthStroke = 2
 kickoffCJS()
 makeIt()
 setupKeyboard()
+setupRiverTrack()
+
+console.log("rtp: ", riverTrackPositions)
 
 ////////////////
+
+function tick(e) {
+  stage.update()
+
+  // if (_.random(100) < 80) {
+  //   makeRiverChunk()
+  // }
+
+  _.times(_.random(20), makeRiverChunk)
+
+}
+
+function setupRiverTrack() {
+  let riverTrack = new lib.RiverTrack_1()
+  _.times(riverTrack.totalFrames, index => { 
+    riverTrack.gotoAndStop(index)
+    let rtp = { 
+      x: riverTrack.bead.x,
+      y: riverTrack.bead.y,
+      rotation: riverTrack.bead.rotation,
+    }
+    riverTrackPositions.push(rtp)
+  })
+
+}
+
+function makeRiverChunk() {
+  let startingPos = _.sample(riverTrackPositions)
+  let riverChunk = new lib.RiverChunk_1()
+  let riverChunkRange = 20
+  riverChunk.x = startingPos.x + _.random(-riverChunkRange, riverChunkRange)
+  riverChunk.y = startingPos.y + _.random(-riverChunkRange, riverChunkRange)
+  riverChunk.rotation = startingPos.rotation
+  if (startingPos.rotation < 0) {
+    container.addChild(riverChunk)
+  } else {
+    container.addChildAt(riverChunk, 0)
+
+  }
+  riverChunk.addEventListener('tick', e => { 
+    if (riverChunk.currentFrame == riverChunk.totalFrames - 1) { 
+      container.removeChild(riverChunk)
+      riverChunk.removeEventListener('tick')
+    }
+  })
+}
 
 function setupKeyboard() {
   window.addEventListener('keypress', e => {
@@ -135,15 +187,31 @@ function makeIt() {
   //   .to({rotation: -rotAmount}, tweenTime, cjs.Ease.quadInOut)
   //   .to({rotation: rotAmount}, tweenTime, cjs.Ease.quadInOut)
 
-  makeBGAssets(patchAssetContainer)
+  makeBGAssets()
+
 
   addTweensToBushAssets()
+  makeHead()
 
   makeVase(-200, 2, 1)
   makeVase(-150, 2.5, -1)
 
   patchAssetContainer.y = -100
 
+}
+
+function makeHead() {
+  let top = _.sortBy(patchAssetContainer.children, ['y'], ['desc'])[0]
+  head = new lib.HeadCollection_1()
+  head.y = top.y - 20
+  head.rotation = -5
+  let tweenTime = 2000
+  // head.gotoAndStop(_.random(head.totalFrames))
+  head.gotoAndStop(0)
+  patchAssetContainer.addChildAt(head, patchAssetContainer.getChildIndex(top)+1)
+  cjs.Tween.get(head, {override:false, loop: -1})
+    .to({rotation: 5, y: head.y - 10}, tweenTime, cjs.Ease.quadInOut)
+    .to({rotation: -5, y: head.y}, tweenTime, cjs.Ease.quadInOut)
 }
 
 function makeVase(y, scale, scaleXMult) {
@@ -185,7 +253,7 @@ function addTweensToBushAssets() {
   })
 }
 
-function makeBGAssets(patchAssetContainer) {
+function makeBGAssets() {
   let bgAssetsContainer = new cjs.Container()
   _.map(pillarShape.children, circle => {
     let bgAsset = new lib.Pilllar_BG_1()
@@ -212,7 +280,7 @@ function recolor(asset, fillColor, strokeColor, strokeWidth) {
 function makePillarShape() {
   let pillarShapeContainer = new cjs.Container()
   let numCircles = _.random(10, 20)
-  let yDistInterval = _.random(20, 30)
+  let yDistInterval = _.random(20, 25)
   // let yDistInterval = _.random(10, 20)
   // let yDistInterval = _.random(5, 10)
   let xRange = _.random(50, 150)
@@ -244,26 +312,22 @@ function kickoffCJS() {
   cjs.Ticker.addEventListener('tick', tick)
 }
 
-function tick(e) {
-  stage.update()
-}
-
 function placeItem(item, range) {
   item.x = _.random(-range, range)
   item.y = _.random(-range, range)
 }
 
-function makeHead2() {
-  let item = new lib.Pilllar_BG_1()
-  return item
-}
+// function makeHead2() {
+//   let item = new lib.Pilllar_BG_1()
+//   return item
+// }
 
-function makeHead() {
-  let item = new cjs.Shape()
-  item.graphics.beginFill('pink')
-    .drawCircle(0, 0, 100)
-  return item
-}
+// function makeHead() {
+//   let item = new cjs.Shape()
+//   item.graphics.beginFill('pink')
+//     .drawCircle(0, 0, 100)
+//   return item
+// }
 
 function makeBGShape() {
   let item = new lib.Pilllar_BG_1()
