@@ -41,8 +41,6 @@ makeIt()
 setupKeyboard()
 setupRiverTrack()
 
-
-
 console.log("rtp: ", riverTrackPositions)
 
 ////////////////
@@ -196,8 +194,8 @@ function makeIt() {
   makePillarBGAssets()
 
 
-  addTweensToBushAssets()
   makeHead()
+  addTweensToBushAssets()
 
   makeVase(-200, 2, 1)
   makeVase(-150, 2.5, -1)
@@ -221,24 +219,48 @@ function makeBGPattern() {
       bgAsset.children[0].graphics._strokeStyle.width = 1
       // bgAsset.cache(-25, -25, 50, 50)
       bgPattern.addChild(bgAsset)
+      bgPattern.y = -400
     })
   })
   bgPattern.cache(-(gridSize * spacing / 2), -(gridSize * spacing / 2), (gridSize * spacing), (gridSize * spacing))
+  let tweenTime = 900000 / 2
+  cjs.Tween.get(bgPattern, {override:false, loop: -1})
+    .to({rotation: -360}, tweenTime)
+    // .to({scaleX: 1.05, scaleY: 1.1}, tweenTime, cjs.Ease.quadInOut)
+    // .to({scaleX: 1, scaleY: 1}, tweenTime, cjs.Ease.quadInOut)
   return bgPattern
 }
 
 function makeHead() {
+  let playing = false
   let top = _.sortBy(patchAssetContainer.children, ['y'], ['desc'])[0]
-  head = new lib.HeadCollection_1()
-  head.y = top.y - 20
-  head.rotation = -5
+  head = new lib.HeadCollection_2()
+  head.skull.gotoAndPlay(_.random(head.skull.totalFrames))
+  head.eye.gotoAndPlay(_.random(head.eye.totalFrames))
+  head.mouth.gotoAndPlay(_.random(head.mouth.totalFrames))
+  head.y = top.y - 40
+  head.rotation = -1
   let tweenTime = 2000
   // head.gotoAndStop(_.random(head.totalFrames))
-  head.gotoAndStop(0)
+  // head.gotoAndStop(1)
   patchAssetContainer.addChildAt(head, patchAssetContainer.getChildIndex(top)+1)
-  cjs.Tween.get(head, {override:false, loop: -1})
-    .to({rotation: 5, y: head.y - 10}, tweenTime, cjs.Ease.quadInOut)
-    .to({rotation: -5, y: head.y}, tweenTime, cjs.Ease.quadInOut)
+  // cjs.Tween.get(head, {override:false, loop: -1})
+  //   .to({rotation: 1, y: head.y - 10}, tweenTime, cjs.Ease.quadInOut)
+  //   .to({rotation: -1, y: head.y}, tweenTime, cjs.Ease.quadInOut)
+  setInterval(e => {
+    if (playing) {
+      playing = false
+      head.skull.gotoAndStop()
+      head.eye.gotoAndStop()
+      head.mouth.gotoAndStop()
+    } else {
+
+      playing = true
+      head.skull.gotoAndPlay(_.random(head.skull.totalFrames))
+      head.eye.gotoAndPlay(_.random(head.eye.totalFrames))
+      head.mouth.gotoAndPlay(_.random(head.mouth.totalFrames))
+    }
+  }, 2000)
 }
 
 function makeVase(y, scale, scaleXMult) {
@@ -271,12 +293,16 @@ function addTweensToBushAssets() {
   _.map(patchAssetContainer.children, (asset, index) => {
     let initRotation = asset.rotation
     let initY = asset.y
-    let newRotation = asset.rotation + _.random(-40, 40)
+    let newRotation = asset.rotation + _.random(-10, 10)
     let tweenTime = 933.3333333333
     cjs.Tween.get(asset, {override:false, loop: -1})
       .wait(index * 40)
-      .to({rotation: newRotation, y: initY - _.random(20, 60)}, tweenTime, cjs.Ease.quadInOut)
+      .to({rotation: newRotation, y: initY - _.random(-30, 30)}, tweenTime, cjs.Ease.quadInOut)
+      // .to({rotation: newRotation, y: initY - _.random(20, 60)}, tweenTime, cjs.Ease.quadInOut)
       .to({rotation: initRotation, y: initY}, tweenTime, cjs.Ease.quadInOut)  
+      // .to({y: initY - _.random(20, 30)}, tweenTime, cjs.Ease.quadInOut)
+      // // .to({rotation: newRotation, y: initY - _.random(20, 60)}, tweenTime, cjs.Ease.quadInOut)
+      // .to({y: initY}, tweenTime, cjs.Ease.quadInOut)  
   })
 }
 
@@ -325,7 +351,7 @@ function makePillarShape() {
 }
 
 function makePillarAssets(pillarShape) {
-  let assets = _.times(_.random(15, 20), makeMarker)
+  let assets = _.times(_.random(20, 30), makeMarker)
   _.map(assets, asset => {
     pillarAssetContainer.addChild(asset)
     let pt
